@@ -20,6 +20,7 @@
 #include "main.h"
 #include "adc.h"
 #include "crc.h"
+#include "dma.h"
 #include "i2c.h"
 #include "rtc.h"
 #include "tim.h"
@@ -93,6 +94,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
@@ -106,7 +108,7 @@ int main(void)
   HAL_Delay(100);
   HAL_TIM_PWM_Start(&htim9,TIM_CHANNEL_1);
   __HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_1,20);
-  HAL_Delay(100);
+  HAL_Delay(1000);
   __HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_1,0);
   /* USER CODE END 2 */
 
@@ -117,10 +119,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    pwr_enable(PWR_BOOST);
-    HAL_Delay(10000);
-    pwr_disable(PWR_BOOST);
-    HAL_Delay(10000);
 
   }
   /* USER CODE END 3 */

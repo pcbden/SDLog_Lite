@@ -39,3 +39,6 @@
 
 #define BUZZER_TIMER_HANDLE_Pointer &htim9
 #define BUZZER_TIMER_CHANNEL TIM_CHANNEL_1
+
+#define UART_RS485_RE_Pin GPIO_PIN_1
+#define UART_RS485_RE_Port GPIOA

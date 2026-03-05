@@ -1,5 +1,5 @@
 #include "pwr_manager.h"
-#include "gpio_drivers.h"
+#include "gpio_driver.h"
 bool pwr_enable(pwr_component_t component){
   if(component == PWR_MODEM){
     if(gpio_get(MODEM_STATUS_Port,MODEM_STATUS_Pin) == GPIO_STATE_HIGH){
