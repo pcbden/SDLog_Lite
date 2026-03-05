@@ -29,7 +29,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "pwr_manager.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -103,7 +103,11 @@ int main(void)
   MX_TIM9_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_Delay(100);
+  HAL_TIM_PWM_Start(&htim9,TIM_CHANNEL_1);
+  __HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_1,20);
+  HAL_Delay(100);
+  __HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_1,0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -113,6 +117,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    pwr_enable(PWR_BOOST);
+    HAL_Delay(10000);
+    pwr_disable(PWR_BOOST);
+    HAL_Delay(10000);
+
   }
   /* USER CODE END 3 */
 }
@@ -200,8 +209,6 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
