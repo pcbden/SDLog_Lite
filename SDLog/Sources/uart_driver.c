@@ -1,11 +1,11 @@
 #include <string.h>
 #include "uart_driver.h"
-#include "usart.h"
 #include "gpio_driver.h"
+
 extern void Error_Handler(void);
-uint8_t uart_modem_rx_buffer[UART_BUFFER_SIZE];
-uint8_t uart_sensor_rx_buffer[UART_BUFFER_SIZE];
-uint8_t uart_aux_rx_buffer[UART_BUFFER_SIZE];
+uint8_t uart_modem_rx_buffer[UART_BUFFER_SIZE + 1];
+uint8_t uart_sensor_rx_buffer[UART_BUFFER_SIZE + 1];
+uint8_t uart_aux_rx_buffer[UART_BUFFER_SIZE + 1];
 
 bool uart_modem_rx_flag; 
 bool uart_sensor_rx_flag; 
@@ -100,6 +100,7 @@ void uart_init(uart_port_t uart, uart_baud_t baud, uart_worldlen_t wordlen, uart
       Error_Handler();
     }
   }
+  uart_start_receive(uart);
 }
 void uart_send_str(uart_port_t uart, const char* str){
   if(uart == UART_MODEM){
@@ -131,17 +132,37 @@ void uart_send_raw(uart_port_t uart, const uint8_t* data, uint16_t len){
     HAL_UART_Transmit(&huart3,data,len,UART_TRANSMIT_TIMEOUT_MS);
   }
 }
+void uart_start_receive(uart_port_t uart){
+  if(uart == UART_MODEM){
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart1,uart_modem_rx_buffer,UART_BUFFER_SIZE);
+  }
+  if(uart == UART_SENSOR){
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart2,uart_sensor_rx_buffer,UART_BUFFER_SIZE);
+  }
+  if(uart == UART_AUX){
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart3,uart_aux_rx_buffer,UART_BUFFER_SIZE);
+  }
+}
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
   if(huart->Instance == USART1){
-    uart_modem_rx_size = Size;
-    uart_modem_rx_flag = true;
+    if(Size > UART_MODEM_MAX_RX_SIZE){
+      uart_modem_rx_size = Size;
+      uart_modem_rx_flag = true;
+      uart_modem_rx_buffer[Size] = '\0';
+    }
   }
   if(huart->Instance == USART2){
-    uart_sensor_rx_size = Size;
-    uart_sensor_rx_flag = true;
+    if(Size > UART_SENSOR_MAX_RX_SIZE){
+      uart_sensor_rx_size = Size;
+      uart_sensor_rx_flag = true;
+      uart_sensor_rx_buffer[Size] = '\0';
+    }
   }
   if(huart->Instance == USART3){
-    uart_aux_rx_size = Size;
-    uart_aux_rx_flag = true;
+    if(Size > UART_AUX_MAX_RX_SIZE){
+      uart_aux_rx_size = Size;
+      uart_aux_rx_flag = true;
+      uart_aux_rx_buffer[Size] = '\0';
+    }
   }
 }

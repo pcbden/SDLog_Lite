@@ -36,6 +36,7 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
+SDLog/Sources/command_driver.c \
 SDLog/Sources/uart_driver.c \
 SDLog/Sources/pwr_manager.c \
 SDLog/Sources/gpio_driver.c \
