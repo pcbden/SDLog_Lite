@@ -1,7 +1,7 @@
 #pragma once 
 
 #include <stdint.h>
-#include "stdbool.h"
+#include <stdbool.h>
 
 #define MODEM_PWRS_TIMEOUT_MS 1500
 #define BUZZER_TIMER_COMPARE 10
@@ -20,3 +20,4 @@ typedef enum {
 bool pwr_enable(pwr_component_t component);
 bool pwr_disable(pwr_component_t component);
 bool pwr_is_enabled(pwr_component_t component);
+void pwr_buzzer_init(pwr_component_t component);

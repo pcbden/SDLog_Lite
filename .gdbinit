@@ -1,6 +1,11 @@
-set confirm off
 define reload
-  file build/SDLog_Lite.elf
+  delete
+  directory
+  symbol-file
+  symbol-file build/SDLog_Lite.elf
   load
+  monitor reset halt
+end
+define reset
   monitor reset halt
 end

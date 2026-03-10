@@ -80,6 +80,8 @@ void Error_Handler(void);
 #define EN_5V_GPIO_Port GPIOC
 #define PWRS_Pin GPIO_PIN_10
 #define PWRS_GPIO_Port GPIOC
+#define RTS_Pin GPIO_PIN_12
+#define RTS_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
 

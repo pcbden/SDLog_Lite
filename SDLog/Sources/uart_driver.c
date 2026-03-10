@@ -1,6 +1,8 @@
 #include <string.h>
 #include "uart_driver.h"
 #include "gpio_driver.h"
+#include "sdlog_info.h"
+#include "usbd_cdc_if.h"
 
 extern void Error_Handler(void);
 uint8_t uart_modem_rx_buffer[UART_BUFFER_SIZE + 1];
@@ -103,18 +105,23 @@ void uart_init(uart_port_t uart, uart_baud_t baud, uart_worldlen_t wordlen, uart
   uart_start_receive(uart);
 }
 void uart_send_str(uart_port_t uart, const char* str){
+  uint16_t len = strlen(str);
+  volatile HAL_StatusTypeDef res = HAL_ERROR;
+  UNUSED(res);
   if(uart == UART_MODEM){
-    HAL_UART_Transmit(&huart1,(uint8_t*)str,strlen(str),UART_TRANSMIT_TIMEOUT_MS);
+    res = HAL_UART_Transmit(&huart1,(uint8_t*)str,len,UART_TRANSMIT_TIMEOUT_MS);
+    __NOP();
   }
   if(uart == UART_SENSOR){
     gpio_set(UART_RS485_RE_Port,UART_RS485_RE_Pin,GPIO_STATE_HIGH);
     HAL_Delay(UART_RS485_ASSERT_MS);
-    HAL_UART_Transmit(&huart2,(uint8_t*)str,strlen(str),UART_TRANSMIT_TIMEOUT_MS);
+    HAL_UART_Transmit(&huart2,(uint8_t*)str,len,UART_TRANSMIT_TIMEOUT_MS);
     HAL_Delay(UART_RS485_DEASSERT_MS);
     gpio_set(UART_RS485_RE_Port,UART_RS485_RE_Pin,GPIO_STATE_LOW);
   }
   if(uart == UART_AUX){
-    HAL_UART_Transmit(&huart3,(uint8_t*)str,strlen(str),UART_TRANSMIT_TIMEOUT_MS);
+    res = HAL_UART_Transmit(&huart3,(uint8_t*)str,len,UART_TRANSMIT_TIMEOUT_MS);
+    __NOP();
   }
 }
 void uart_send_raw(uart_port_t uart, const uint8_t* data, uint16_t len){
@@ -144,25 +151,44 @@ void uart_start_receive(uart_port_t uart){
   }
 }
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
+  __NOP();
   if(huart->Instance == USART1){
-    if(Size > UART_MODEM_MAX_RX_SIZE){
-      uart_modem_rx_size = Size;
-      uart_modem_rx_flag = true;
-      uart_modem_rx_buffer[Size] = '\0';
+    if(debug_mode == DEBUG_MODE_NONE){
+      if(Size < UART_MODEM_MAX_RX_SIZE){
+        uart_modem_rx_size = Size;
+        uart_modem_rx_flag = true;
+        uart_modem_rx_buffer[Size] = '\0';
+      }
+    }
+    if(debug_mode == DEBUG_MODE_UART1){
+      CDC_Transmit_FS(uart_modem_rx_buffer,Size);
+      uart_start_receive(UART_MODEM);
     }
   }
   if(huart->Instance == USART2){
-    if(Size > UART_SENSOR_MAX_RX_SIZE){
+    if(Size < UART_SENSOR_MAX_RX_SIZE){
       uart_sensor_rx_size = Size;
       uart_sensor_rx_flag = true;
       uart_sensor_rx_buffer[Size] = '\0';
     }
   }
   if(huart->Instance == USART3){
-    if(Size > UART_AUX_MAX_RX_SIZE){
+    if(Size < UART_AUX_MAX_RX_SIZE){
       uart_aux_rx_size = Size;
       uart_aux_rx_flag = true;
       uart_aux_rx_buffer[Size] = '\0';
     }
+  }
+}
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
+  HAL_UART_AbortReceive(huart);
+  if(huart->Instance == USART1){
+    uart_start_receive(UART_MODEM);
+  }
+  if(huart->Instance == USART2){
+    uart_start_receive(UART_SENSOR);
+  }
+  if(huart->Instance == USART3){
+    uart_start_receive(UART_AUX);
   }
 }

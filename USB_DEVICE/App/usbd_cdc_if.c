@@ -22,7 +22,8 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "sdlog_info.h"
+#include "usart.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -261,6 +262,19 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+  Buf[*Len] = '\0';
+  if(strstr((char*)Buf,"UART1") != NULL){
+    debug_mode = DEBUG_MODE_UART1;
+    *Len = 0;
+  }
+  if(strstr((char*)Buf,"NONE") != NULL){
+    debug_mode = DEBUG_MODE_NONE;
+    *Len = 0;
+  }
+  if(debug_mode == DEBUG_MODE_UART1){
+    HAL_UART_Transmit(&huart1,Buf,*Len,100);
+  }
+  
   return (USBD_OK);
   /* USER CODE END 6 */
 }

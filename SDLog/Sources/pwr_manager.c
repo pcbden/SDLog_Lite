@@ -1,6 +1,9 @@
 #include "pwr_manager.h"
 #include "gpio_driver.h"
 #include "stm32l1xx_hal.h"
+void pwr_buzzer_init(pwr_component_t component){
+  HAL_TIM_PWM_Start(BUZZER_TIMER_HANDLE_Pointer,BUZZER_TIMER_CHANNEL);
+}
 bool pwr_enable(pwr_component_t component){
   if(component == PWR_MODEM){
     if(gpio_get(MODEM_STATUS_Port,MODEM_STATUS_Pin) == GPIO_STATE_HIGH){
