@@ -1,16 +1,12 @@
 #pragma once
-
-#include <stdint.h>
 #include <stdbool.h>
-#include "commands.h"
+
 typedef enum {
-  MODEM_INIT_AT_CHECK,
-  MODEM_INIT_AT_ERROR,
-  MODEM_INIT_SIM_CHECK,
-  MODEM_INIT_SIM_ERROR,
-  MODEM_INIT_REG_CHECK,
-  MODEM_INIT_REG_ERROR,
-  MODEM_INIT_COLLECT_INFO,
-  MODEM_INIT_END,
+  MODEM_INIT_OK,
+  MODEM_INIT_NOSIM,
+  MODEM_INIT_NOPROVIDER,
+  MODEM_INIT_UNKNOWN,
 }modem_init_t;
-bool modem_init(void);
+modem_init_t modem_init(void);
+bool modem_internet_connect(void);
+void modem_ntp_update(void);

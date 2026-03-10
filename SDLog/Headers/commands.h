@@ -3,7 +3,7 @@
 #include "sdlog_info.h"
 
 static const command_t AT = {
-  .at_string = "ATE0\r\n",
+  .at_string = "ATE1\r\n",
   .response_string = "OK\r\n",
   .type = COMMAND_TYPE_REPEATED,
   .timeout_ms = 1000,
@@ -98,4 +98,91 @@ static const command_t AT_FSREAD = {
   .response_string = "OK",
   .type = COMMAND_TYPE_SINGLE,
   .timeout_ms = 1000,
+};
+static const command_t AT_CGATT_CHECK = {
+  .at_string = "AT+CGATT?\r\n",
+  .response_string = "+CGATT: 1",
+  .type = COMMAND_TYPE_REPEATED,
+  .timeout_ms = 1000,
+  .post_delay_ms = 1000,
+  .count = 75,
+};
+static const command_t AT_CGATT = {
+  .at_string = "AT+CGATT=1\r\n",
+  .response_string = "OK",
+  .type = COMMAND_TYPE_SINGLE_UNTIL,
+  .timeout_ms = 75000,
+};
+static const command_t AT_SAPBR_CONTYPE = {
+  .at_string = "AT+SAPBR=3,1,\"CONTYPE\",\"%s\"\r\n%s%s%s",
+  .response_string = "OK",
+  .type = COMMAND_TYPE_BUILD,
+  .p = {info.apn_con_type,"","",""},
+  .timeout_ms = 1000,
+};
+static const command_t AT_SAPBR_APN = {
+  .at_string = "AT+SAPBR=3,1,\"APN\",\"%s\"\r\n%s%s%s",
+  .response_string = "OK",
+  .type = COMMAND_TYPE_BUILD,
+  .p = {info.apn_name,"","",""},
+  .timeout_ms = 1000,
+};
+static const command_t AT_SAPBR_USER = {
+  .at_string = "AT+SAPBR=3,1,\"USER\",\"%s\"\r\n%s%s%s",
+  .response_string = "OK",
+  .type = COMMAND_TYPE_BUILD,
+  .p = {info.apn_user_name,"","",""},
+  .timeout_ms = 1000,
+};
+static const command_t AT_SAPBR_PWD = {
+  .at_string = "AT+SAPBR=3,1,\"PWD\",\"%s\"\r\n%s%s%s",
+  .response_string = "OK",
+  .type = COMMAND_TYPE_BUILD,
+  .p = {info.apn_password,"","",""},
+  .timeout_ms = 1000,
+};
+static const command_t AT_SAPBR_PHONENUM = {
+  .at_string = "AT+SAPBR=3,1,\"PHONENUM\",\"%s\"\r\n%s%s%s",
+  .response_string = "OK",
+  .type = COMMAND_TYPE_BUILD,
+  .p = {info.apn_phone_num,"","",""},
+  .timeout_ms = 1000,
+};
+static const command_t AT_SAPBR_RATE = {
+  .at_string = "AT+SAPBR=3,1,\"RATE\",\"%s\"\r\n%s%s%s",
+  .response_string = "OK",
+  .type = COMMAND_TYPE_BUILD,
+  .p = {info.apn_rate,"","",""},
+  .timeout_ms = 1000,
+};
+static const command_t AT_SAPBR_OPEN = {
+  .at_string = "AT+SAPBR=1,1\r\n",
+  .response_string = "OK",
+  .type = COMMAND_TYPE_SINGLE_UNTIL,
+  .timeout_ms = 85000,
+  .post_delay_ms = 1000,
+};
+static const command_t AT_SAPBR_CHECKIP = {
+  .at_string = "AT+SAPBR=2,1\r\n",
+  .response_string = "0.0.0.0",
+  .type = COMMAND_TYPE_SINGLE,
+  .timeout_ms = 1000,
+};
+static const command_t AT_CNTP_SERVER1 = {
+  .at_string = "AT+CNTP=\"pool.ntp.org\",0\r\n",
+  .response_string = "OK",
+  .type = COMMAND_TYPE_SINGLE,
+  .timeout_ms = 1000,
+};
+static const command_t AT_CNTP_SERVER2 = {
+  .at_string = "AT+CNTP=\"time.google.com\",0\r\n",
+  .response_string = "OK",
+  .type = COMMAND_TYPE_SINGLE,
+  .timeout_ms = 1000,
+};
+static const command_t AT_CNTP = {
+  .at_string = "AT+CNTP\r\n",
+  .response_string = "+CNTP: 1",
+  .type = COMMAND_TYPE_SINGLE_UNTIL,
+  .timeout_ms = 10000,
 };

@@ -266,10 +266,12 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   if(strstr((char*)Buf,"UART1") != NULL){
     debug_mode = DEBUG_MODE_UART1;
     *Len = 0;
+    CDC_Transmit_FS((uint8_t*)"UART1\r\n",7);
   }
   if(strstr((char*)Buf,"NONE") != NULL){
     debug_mode = DEBUG_MODE_NONE;
     *Len = 0;
+    CDC_Transmit_FS((uint8_t*)"NONE\r\n",6);
   }
   if(debug_mode == DEBUG_MODE_UART1){
     HAL_UART_Transmit(&huart1,Buf,*Len,100);

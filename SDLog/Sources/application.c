@@ -12,29 +12,44 @@ void application_run(void){
   while(1){
     switch (state) {
       case APP_STATE_START:
-        CDC_Transmit_FS((uint8_t*)"Reset\n",6);
         pwr_enable(PWR_BUZZER);
         HAL_Delay(100);
         pwr_disable(PWR_BUZZER);
-        state = APP_STATE_MODEM_INIT;
+        state = BOOT_APP_STATE_MODEM_INIT;
         break;
-      case APP_STATE_MODEM_INIT:
+      case BOOT_APP_STATE_MODEM_INIT:
         pwr_enable(PWR_MODEM);
-        if(modem_init()){
-          state = APP_STATE_CONNECT;
+        if(modem_init() == MODEM_INIT_OK){
+          state = BOOT_APP_STATE_CONFIG;
         }
         else {
           state = APP_STATE_SLEEP;
         }
         break;
-      case APP_STATE_CONNECT:
-        config_read();
-        //pwr_disable(PWR_MODEM);
-        while (1)
+      case BOOT_APP_STATE_CONFIG:
+        if(config_read() == true){
+          state = BOOT_APP_STATE_CONNECT;
+        }
+        else{
+          state = APP_STATE_SLEEP;
+        }
+        break;
+      case BOOT_APP_STATE_CONNECT:
+        if(modem_internet_connect() == true){
+          state = BOOT_APP_STAT_NTP;
+        }
+        else{
+          state = APP_STATE_SLEEP;
+        }
+        break;
+      case BOOT_APP_STAT_NTP:
+        modem_ntp_update();
+        pwr_disable(PWR_MODEM);
+        while(1)
           ;
         break;
       case APP_STATE_SLEEP:
-        //pwr_disable(PWR_MODEM);
+        pwr_disable(PWR_MODEM);
         while (1)
           ;
         break;

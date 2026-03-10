@@ -54,6 +54,7 @@ bool config_read(void){
       command_extract((char*)file_buffer,"NAME1=","#",info.name1,0,32);
       command_extract((char*)file_buffer,"NAME2=","#",info.name2,0,32);
       command_extract((char*)file_buffer,"NAME3=","#",info.name3,0,32);
+      return true;
     }
   }
   return false;

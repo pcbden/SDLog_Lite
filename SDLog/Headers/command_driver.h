@@ -8,6 +8,7 @@ typedef enum {
   COMMAND_TYPE_SINGLE_UNTIL,
   COMMAND_TYPE_REPEATED,
   COMMAND_TYPE_STORED,
+  COMMAND_TYPE_BUILD,
 }command_type_t;
 
 typedef enum {
@@ -18,9 +19,10 @@ typedef enum {
 
 typedef struct {
   const char* at_string;
+  const char* p[4];
   const char* response_string;
   command_type_t type;
-  uint16_t timeout_ms;
+  uint32_t timeout_ms;
   uint16_t post_delay_ms;
   uint16_t count;
   const char* prefix;

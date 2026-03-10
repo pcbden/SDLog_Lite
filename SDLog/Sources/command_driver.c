@@ -26,6 +26,23 @@ command_result_t command_execute(command_t command){
     }
     uart_start_receive(UART_MODEM);
   }
+  if(command.type == COMMAND_TYPE_BUILD){
+    char temp_at_string[256];
+    snprintf(temp_at_string,sizeof(temp_at_string),command.at_string,command.p[0],command.p[1],command.p[2],command.p[3]);
+    uart_send_str(UART_MODEM,temp_at_string);
+    res = COMMAND_RESULT_TIMEOUT;
+    while((HAL_GetTick() - start) < command.timeout_ms){
+      if(uart_modem_rx_flag){
+        uart_modem_rx_flag = false;
+        command_result_process(command);
+        res = (response_flag == true) ? COMMAND_RESULT_OK : COMMAND_RESULT_ERROR;
+        response_flag = false;
+        uart_start_receive(UART_MODEM);
+        break;
+      }
+    }
+    uart_start_receive(UART_MODEM);
+  }
   if(command.type == COMMAND_TYPE_SINGLE_UNTIL){
     uart_send_str(UART_MODEM,command.at_string);
     res = COMMAND_RESULT_TIMEOUT;
