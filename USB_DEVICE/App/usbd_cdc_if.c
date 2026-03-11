@@ -23,7 +23,9 @@
 
 /* USER CODE BEGIN INCLUDE */
 #include "sdlog_info.h"
-#include "usart.h"
+#include "uart_driver.h"
+#include "sensor_reader.h"
+#include "pwr_manager.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -268,13 +270,29 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
     *Len = 0;
     CDC_Transmit_FS((uint8_t*)"UART1\r\n",7);
   }
+  if(strstr((char*)Buf,"UART2") != NULL){
+    debug_mode = DEBUG_MODE_UART2;
+    *Len = 0;
+    CDC_Transmit_FS((uint8_t*)"UART2\r\n",7);
+    pwr_enable(PWR_BOOST);
+  }
+  if(strstr((char*)Buf,"SENSOR") != NULL){
+    *Len = 0;
+    debug_mode = DEBUG_MODE_NONE;
+    sensor_read_all(SENSOR_TEST_ON);
+    debug_mode = DEBUG_MODE_UART2;
+  }
   if(strstr((char*)Buf,"NONE") != NULL){
     debug_mode = DEBUG_MODE_NONE;
     *Len = 0;
     CDC_Transmit_FS((uint8_t*)"NONE\r\n",6);
+    pwr_disable(PWR_BOOST);
   }
   if(debug_mode == DEBUG_MODE_UART1){
-    HAL_UART_Transmit(&huart1,Buf,*Len,100);
+    uart_send_raw(UART_MODEM,Buf,*Len);
+  }
+  if(debug_mode == DEBUG_MODE_UART2){
+    uart_send_raw(UART_SENSOR,Buf,*Len);
   }
   
   return (USBD_OK);

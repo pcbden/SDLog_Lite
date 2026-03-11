@@ -3,8 +3,10 @@
 typedef enum {
   DEBUG_MODE_NONE,
   DEBUG_MODE_UART1,
+  DEBUG_MODE_UART2,
 }debug_mode_t;
 typedef struct {
+  char sensor_temperature[INFO_PARAM_MAX_LEN];
   char provider[INFO_PARAM_MAX_LEN];
   char imei[INFO_PARAM_MAX_LEN];
   char sig_quality_dbm[INFO_PARAM_MAX_LEN];

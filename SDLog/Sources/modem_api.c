@@ -1,5 +1,5 @@
 #include "modem_api.h"
-#include "commands.h"
+#include "at_commands.h"
 
 
 modem_init_t modem_init(void){

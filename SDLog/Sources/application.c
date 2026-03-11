@@ -44,6 +44,8 @@ void application_run(void){
         break;
       case BOOT_APP_STAT_NTP:
         modem_ntp_update();
+        while(1)
+          ;
         pwr_disable(PWR_MODEM);
         while(1)
           ;
@@ -58,5 +60,6 @@ void application_run(void){
 }
 void application_init(void){
   uart_init(UART_MODEM,UART_BAUD_9600,UART_WORDLEN_8,UART_PAR_NONE,UART_STOP_1);
+  uart_init(UART_SENSOR,UART_BAUD_9600,UART_WORDLEN_8,UART_PAR_NONE,UART_STOP_1);
   pwr_buzzer_init(PWR_BUZZER);
 }

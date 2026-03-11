@@ -153,12 +153,10 @@ void uart_start_receive(uart_port_t uart){
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
   __NOP();
   if(huart->Instance == USART1){
-    if(debug_mode == DEBUG_MODE_NONE){
-      if(Size < UART_MODEM_MAX_RX_SIZE){
-        uart_modem_rx_size = Size;
-        uart_modem_rx_flag = true;
-        uart_modem_rx_buffer[Size] = '\0';
-      }
+    if(Size < UART_MODEM_MAX_RX_SIZE){
+      uart_modem_rx_size = Size;
+      uart_modem_rx_flag = true;
+      uart_modem_rx_buffer[Size] = '\0';
     }
     if(debug_mode == DEBUG_MODE_UART1){
       CDC_Transmit_FS(uart_modem_rx_buffer,Size);
@@ -170,6 +168,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
       uart_sensor_rx_size = Size;
       uart_sensor_rx_flag = true;
       uart_sensor_rx_buffer[Size] = '\0';
+    }
+    if(debug_mode == DEBUG_MODE_UART2){
+      CDC_Transmit_FS(uart_sensor_rx_buffer,Size);
+      uart_start_receive(UART_SENSOR);
     }
   }
   if(huart->Instance == USART3){

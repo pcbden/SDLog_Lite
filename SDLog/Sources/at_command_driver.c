@@ -1,4 +1,4 @@
-#include "command_driver.h"
+#include "at_command_driver.h"
 #include "uart_driver.h"
 #include <string.h>
 #include "usbd_cdc_if.h"
@@ -8,7 +8,7 @@
 uint8_t urc_buffer[1024];
 bool urc_flag;
 bool response_flag;
-command_result_t command_execute(command_t command){
+command_result_t command_execute(at_command_t command){
   uint32_t start = HAL_GetTick();
   command_result_t res = COMMAND_RESULT_ERROR;
   if(command.type == COMMAND_TYPE_SINGLE){
@@ -88,7 +88,7 @@ command_result_t command_execute(command_t command){
   }
   if(command.type == COMMAND_TYPE_REPEATED){
     int i = 0;
-    command_t new_command = command;
+    at_command_t new_command = command;
     new_command.type = COMMAND_TYPE_SINGLE;
     res = COMMAND_RESULT_TIMEOUT;
     while(i < new_command.count){
@@ -120,7 +120,7 @@ bool command_extract(char* buf, const char* prefix, const char* suffix, char* st
   store[len] = '\0';
   return true;
 }
-void command_result_process(command_t command){
+void command_result_process(at_command_t command){
   if(strstr((char*)uart_modem_rx_buffer,command.response_string) != NULL){
     response_flag  = true;
   }
