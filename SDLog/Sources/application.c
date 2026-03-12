@@ -16,6 +16,8 @@ void application_run(void){
         HAL_Delay(100);
         pwr_disable(PWR_BUZZER);
         state = BOOT_APP_STATE_MODEM_INIT;
+        debug_mode = DEBUG_MODE_UART2;
+        pwr_enable(PWR_BOOST);
         break;
       case BOOT_APP_STATE_MODEM_INIT:
         pwr_enable(PWR_MODEM);

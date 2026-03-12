@@ -17,21 +17,21 @@ uint16_t crc16(uint8_t* buffer, uint16_t len){
   }
   return crc;
 }
-modbus_result_t modbus_execute(modbus_command_t command){
+modbus_result_t modbus_execute(modbus_command_t* command){
   uint32_t start = HAL_GetTick();
   uint16_t my_crc;
   modbus_result_t res = MODBUS_RESULT_TIMEOUT;
-  if(command.type == MODBUS_TYPE_HEX){
-    my_crc = crc16(command.modbus_command,command.modbus_command_len);
-    command.modbus_command[command.modbus_command_len] = (uint8_t)my_crc;
-    command.modbus_command[command.modbus_command_len + 1] = (uint8_t)(my_crc >> 8);
-    uart_send_raw(UART_SENSOR,command.modbus_command,command.modbus_command_len + 2);
-    while((HAL_GetTick() - start) < command.timeout_ms){
+  if(command->type == MODBUS_TYPE_HEX){
+    my_crc = crc16(command->modbus_command,command->modbus_command_len);
+    command->modbus_command[command->modbus_command_len] = (uint8_t)my_crc;
+    command->modbus_command[command->modbus_command_len + 1] = (uint8_t)(my_crc >> 8);
+    uart_send_raw(UART_SENSOR,command->modbus_command,command->modbus_command_len + 2);
+    while((HAL_GetTick() - start) < command->timeout_ms){
       if(uart_sensor_rx_flag){
         uart_sensor_rx_flag = false;
         my_crc = (uart_sensor_rx_buffer[uart_sensor_rx_size - 1] << 8) + uart_sensor_rx_buffer[uart_sensor_rx_size-2];
         if(my_crc == crc16(uart_sensor_rx_buffer,uart_sensor_rx_size - 2)){
-          memcpy(command.modbus_data,uart_sensor_rx_buffer,uart_sensor_rx_size);
+          memcpy(command->modbus_data,uart_sensor_rx_buffer,uart_sensor_rx_size);
           res =  MODBUS_RESULT_OK;
         }
         else{
@@ -43,6 +43,5 @@ modbus_result_t modbus_execute(modbus_command_t command){
     }
     uart_start_receive(UART_SENSOR);
   }
-  HAL_Delay(command.post_delay_ms);
   return res;
 }

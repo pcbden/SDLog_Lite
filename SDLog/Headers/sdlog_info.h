@@ -6,6 +6,8 @@ typedef enum {
   DEBUG_MODE_UART2,
 }debug_mode_t;
 typedef struct {
+  char conductivity_value[INFO_PARAM_MAX_LEN];
+  char conductivity_divide[INFO_PARAM_MAX_LEN];
   char sensor_temperature[INFO_PARAM_MAX_LEN];
   char provider[INFO_PARAM_MAX_LEN];
   char imei[INFO_PARAM_MAX_LEN];

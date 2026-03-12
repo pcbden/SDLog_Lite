@@ -3,6 +3,7 @@
 #include "gpio_driver.h"
 #include "sdlog_info.h"
 #include "usbd_cdc_if.h"
+#include "pwr_manager.h"
 
 extern void Error_Handler(void);
 uint8_t uart_modem_rx_buffer[UART_BUFFER_SIZE + 1];
@@ -159,8 +160,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
       uart_modem_rx_buffer[Size] = '\0';
     }
     if(debug_mode == DEBUG_MODE_UART1){
+      pwr_enable(PWR_LED1_BLUE);
       CDC_Transmit_FS(uart_modem_rx_buffer,Size);
       uart_start_receive(UART_MODEM);
+      pwr_disable(PWR_LED1_BLUE);
     }
   }
   if(huart->Instance == USART2){
@@ -170,8 +173,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
       uart_sensor_rx_buffer[Size] = '\0';
     }
     if(debug_mode == DEBUG_MODE_UART2){
+      pwr_enable(PWR_LED1_BLUE);
       CDC_Transmit_FS(uart_sensor_rx_buffer,Size);
       uart_start_receive(UART_SENSOR);
+      pwr_disable(PWR_LED1_BLUE);
     }
   }
   if(huart->Instance == USART3){

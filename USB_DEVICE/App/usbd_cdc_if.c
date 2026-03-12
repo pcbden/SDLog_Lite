@@ -289,10 +289,14 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
     pwr_disable(PWR_BOOST);
   }
   if(debug_mode == DEBUG_MODE_UART1){
+    pwr_enable(PWR_LED2_BLUE);
     uart_send_raw(UART_MODEM,Buf,*Len);
+    pwr_disable(PWR_LED2_BLUE);
   }
   if(debug_mode == DEBUG_MODE_UART2){
+    pwr_enable(PWR_LED2_BLUE);
     uart_send_raw(UART_SENSOR,Buf,*Len);
+    pwr_disable(PWR_LED2_BLUE);
   }
   
   return (USBD_OK);

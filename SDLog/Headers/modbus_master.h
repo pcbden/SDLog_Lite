@@ -48,6 +48,6 @@ typedef struct {
   uint32_t post_delay_ms;
 }modbus_command_t;
 
-modbus_result_t modbus_execute(modbus_command_t command);
+modbus_result_t modbus_execute(modbus_command_t* command);
 uint16_t crc16(uint8_t* buffer, uint16_t len);
 

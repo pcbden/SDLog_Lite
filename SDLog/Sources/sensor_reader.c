@@ -43,13 +43,13 @@ bool reorder_bytes(modbus_data_byte_order_t byte_order, modbus_data_size_t size,
           result[2] = bytes[1];
           result[3] = bytes[0];
           break;
-        case MODBUS_DATA_BIG_ENDIAN_BYTE_SWAP_CDAB:
+        case MODBUS_DATA_LITTLE_ENDIAN_BYTE_SWAP_BADC:
           result[0] = bytes[2];
           result[1] = bytes[3];
           result[2] = bytes[0];
           result[3] = bytes[1];
           break;
-        case MODBUS_DATA_LITTLE_ENDIAN_BYTE_SWAP_BADC:
+        case MODBUS_DATA_BIG_ENDIAN_BYTE_SWAP_CDAB:
           result[0] = bytes[1];
           result[1] = bytes[0];
           result[2] = bytes[3];
@@ -135,7 +135,8 @@ bool format_data(uint8_t* data,modbus_data_size_t size, modbus_data_type_t type,
         snprintf((char*)result,INFO_PARAM_MAX_LEN,"%lu",uint32);
         break;
       case MODBUS_DATA_FLOAT:
-        memcpy(&f,data,4);
+        uint32_t temp = ((uint32_t)data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+        memcpy(&f,&temp,4);
         snprintf((char*)result,INFO_PARAM_MAX_LEN,"%.*f",presion,f);
         break;
       case MODBUS_DATA_DOUBLE:
@@ -157,6 +158,10 @@ bool format_data(uint8_t* data,modbus_data_size_t size, modbus_data_type_t type,
         break;
       case MODBUS_DATA_DOUBLE:
         memcpy(&d,data,8);
+        uint64_t temp = ((uint64_t)data[0] << 56) | ((uint64_t)data[1] << 48) | ((uint64_t)data[2] << 40) | 
+          ((uint64_t)data[3] << 32) | ((uint64_t)data[4] << 24) | ((uint64_t)data[5] << 16) | 
+          ((uint64_t)data[6] << 8) | data[7];
+        memcpy(&d, &temp, 8);
         snprintf((char*)result,INFO_PARAM_MAX_LEN,"%.*f",presion,d);
         break;
       case MODBUS_DATA_FLOAT:
@@ -166,15 +171,15 @@ bool format_data(uint8_t* data,modbus_data_size_t size, modbus_data_type_t type,
   }
   return true;
 }
-bool sensor_read(modbus_command_t command, sensor_test_t type){
+bool sensor_read(modbus_command_t* command, sensor_test_t type){
   uint8_t temp_array[128];
   bool res = false;
-  memcpy(command.store_pointer,command.modbus_result,INFO_PARAM_MAX_LEN);
+  memcpy(command->store_pointer,command->modbus_result,INFO_PARAM_MAX_LEN);
   if(modbus_execute(command) == MODBUS_RESULT_OK){
-    if(command.modbus_data[1] == 0x03){
-      if(reorder_bytes(command.data_byte_order,command.data_size,&command.modbus_data[3],command.modbus_data[2],temp_array)){
-        if(format_data(temp_array,command.data_size,command.data_type,command.presion,command.modbus_result)){
-          memcpy(command.store_pointer,command.modbus_result,INFO_PARAM_MAX_LEN);
+    if(command->modbus_data[1] == 0x03){
+      if(reorder_bytes(command->data_byte_order,command->data_size,&command->modbus_data[3],command->modbus_data[2],temp_array)){
+        if(format_data(temp_array,command->data_size,command->data_type,command->presion,command->modbus_result)){
+          memcpy(command->store_pointer,command->modbus_result,INFO_PARAM_MAX_LEN);
           res = true;
         }
       }
@@ -184,13 +189,15 @@ bool sensor_read(modbus_command_t command, sensor_test_t type){
     //log here
   }
   if(type == SENSOR_TEST_ON){
-    strncpy((char*)temp_array,command.modbus_description,INFO_PARAM_MAX_LEN);
-    strncat((char*)temp_array,command.store_pointer,strlen(command.store_pointer));
-    HAL_Delay(100);
+    strncpy((char*)temp_array,command->modbus_description,INFO_PARAM_MAX_LEN);
+    strncat((char*)temp_array,command->store_pointer,strlen(command->store_pointer));
+    strncat((char*)temp_array,"\n",2);
     CDC_Transmit_FS(temp_array,strlen((char*)temp_array));
   }
+  HAL_Delay(command->post_delay_ms);
   return res;
 }
 void sensor_read_all(sensor_test_t type){
-  sensor_read(SENSOR_TEMPERATURE,type);
+  sensor_read(&SENSOR_CONDUCT,type);
+  sensor_read(&SENSOR_CONDUCT_DIV,type);
 }

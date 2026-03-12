@@ -58,7 +58,6 @@ command_result_t command_execute(at_command_t command){
         }
         ///////////////////////
         if(urc_flag){
-          CDC_Transmit_FS(urc_buffer,uart_modem_rx_size);
           urc_flag = false;
         }
         ///////////////////////
