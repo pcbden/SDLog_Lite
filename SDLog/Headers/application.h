@@ -15,3 +15,4 @@ typedef enum {
 extern app_state_t state;
 void application_run(void);
 void application_init(void);
+

@@ -5,7 +5,9 @@
 #include <string.h>
 #include "stm32l1xx_hal.h"
 #include "usbd_cdc_if.h"
+#include <math.h>
 
+bool sensor_read_usb_flag = false;
 bool reorder_bytes(modbus_data_byte_order_t byte_order, modbus_data_size_t size, uint8_t* bytes, int len, uint8_t* result){
   if(size == MODBUS_DATA_SIZE_16){
     if(len == 2){
@@ -97,6 +99,12 @@ bool reorder_bytes(modbus_data_byte_order_t byte_order, modbus_data_size_t size,
   }
   return true;
 }
+void divide_result(char* divde, uint8_t* result){
+  long value = strtol((char*)result,NULL,10);
+  long divider = strtol(divde,NULL,10);
+  float res = (float)value/powf(10.0f,(float)divider);
+  snprintf((char*)result,INFO_PARAM_MAX_LEN,"%.*f",(int)divider,res);
+}
 bool format_data(uint8_t* data,modbus_data_size_t size, modbus_data_type_t type, int presion, uint8_t* result){
   int16_t int16;
   uint16_t uint16;
@@ -179,6 +187,9 @@ bool sensor_read(modbus_command_t* command, sensor_test_t type){
     if(command->modbus_data[1] == 0x03){
       if(reorder_bytes(command->data_byte_order,command->data_size,&command->modbus_data[3],command->modbus_data[2],temp_array)){
         if(format_data(temp_array,command->data_size,command->data_type,command->presion,command->modbus_result)){
+          if(command->divide_power_of_10th != NULL){
+            divide_result(command->divide_power_of_10th,command->modbus_result);
+          }
           memcpy(command->store_pointer,command->modbus_result,INFO_PARAM_MAX_LEN);
           res = true;
         }
@@ -198,6 +209,11 @@ bool sensor_read(modbus_command_t* command, sensor_test_t type){
   return res;
 }
 void sensor_read_all(sensor_test_t type){
-  sensor_read(&SENSOR_CONDUCT,type);
+  sensor_read(&SENSOR_ALL,type);
   sensor_read(&SENSOR_CONDUCT_DIV,type);
+  sensor_read(&SENSOR_CONDUCT,type);
+  sensor_read(&SENSOR_TEMP_DIV,type);
+  sensor_read(&SENSOR_TEMP,type);
+  sensor_read(&SENSOR_LEVEL_DIV,type);
+  sensor_read(&SENSOR_LEVEL,type);
 }

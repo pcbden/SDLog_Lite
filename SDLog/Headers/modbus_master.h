@@ -43,6 +43,7 @@ typedef struct {
   modbus_data_byte_order_t data_byte_order;
   int presion;
   char* store_pointer;
+  char* divide_power_of_10th;
   uint8_t modbus_result[32];
   uint32_t timeout_ms;
   uint32_t post_delay_ms;

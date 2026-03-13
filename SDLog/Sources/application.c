@@ -4,7 +4,9 @@
 #include "usbd_cdc_if.h"
 #include "sdlog_info.h"
 #include "file_manager.h"
-
+#include "usbd_cdc_if.h"
+#include "sensor_reader.h"
+extern USBD_HandleTypeDef hUsbDeviceFS;
 sdlog_info_t info;
 debug_mode_t debug_mode = DEBUG_MODE_NONE;
 app_state_t state = APP_STATE_START;
@@ -16,8 +18,16 @@ void application_run(void){
         HAL_Delay(100);
         pwr_disable(PWR_BUZZER);
         state = BOOT_APP_STATE_MODEM_INIT;
-        debug_mode = DEBUG_MODE_UART2;
-        pwr_enable(PWR_BOOST);
+        if(hUsbDeviceFS.dev_state > USBD_STATE_DEFAULT){
+          while(1){
+            if(sensor_read_usb_flag){
+              sensor_read_usb_flag = false;
+              debug_mode = DEBUG_MODE_NONE;
+              sensor_read_all(SENSOR_TEST_ON);
+              debug_mode = DEBUG_MODE_UART2;
+            }
+          }
+        }
         break;
       case BOOT_APP_STATE_MODEM_INIT:
         pwr_enable(PWR_MODEM);

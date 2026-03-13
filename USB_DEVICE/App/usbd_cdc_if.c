@@ -269,6 +269,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
     debug_mode = DEBUG_MODE_UART1;
     *Len = 0;
     CDC_Transmit_FS((uint8_t*)"UART1\r\n",7);
+    pwr_enable(PWR_MODEM);
   }
   if(strstr((char*)Buf,"UART2") != NULL){
     debug_mode = DEBUG_MODE_UART2;
@@ -278,15 +279,14 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   }
   if(strstr((char*)Buf,"SENSOR") != NULL){
     *Len = 0;
-    debug_mode = DEBUG_MODE_NONE;
-    sensor_read_all(SENSOR_TEST_ON);
-    debug_mode = DEBUG_MODE_UART2;
+    sensor_read_usb_flag = true;
   }
   if(strstr((char*)Buf,"NONE") != NULL){
     debug_mode = DEBUG_MODE_NONE;
     *Len = 0;
     CDC_Transmit_FS((uint8_t*)"NONE\r\n",6);
     pwr_disable(PWR_BOOST);
+    pwr_disable(PWR_MODEM);
   }
   if(debug_mode == DEBUG_MODE_UART1){
     pwr_enable(PWR_LED2_BLUE);
